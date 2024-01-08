@@ -1,6 +1,49 @@
-# plugin-starter
+# halo-plugin-meilisearch
 
-Halo 2.0 插件开发快速开始模板。
+## 介绍
+支持 hal 集成 meilisearch，更准确、更强大的搜索功能。
+
+此插件与搜索组件不冲突，需要安装搜索组件。
+
+## 使用方式
+
+**使用 meiliSearch Cloud 或者自己搭建 meiliSearch 服务都可以。**
+
+### 搭建 meilisearch
+
+docker-compose.yml
+
+```yaml
+version: "3"
+
+services:
+  meilisearch:
+    image: getmeili/meilisearch:v1.5
+    container_name: meilisearch
+    restart: on-failure:3
+    ports:
+      - 7700:7700
+    volumes:
+      - ./meili_data:/meili_data
+    environment:
+      - MEILI_ENV=production
+      - MEILI_MASTER_KEY=95d031f029c0f93289791d39f01a7f42a2211973
+      - MEILI_NO_ANALYTICS=true
+```
+
+* MEILI_MASTER_KEY 可自定义
+
+### 设置插件
+进入插件详情 -> 基本设置，填写 meiliseach 的 host、masterKey、单条搜索结果的长度。
+
+### 已知问题
+
+#### 1. 更改设置后不生效
+更新设置后，需重启插件方可生效。
+
+#### 2. 搜索不到文章
+可能是文章未被索引导致，需进入仪表盘 → 刷新搜索引擎。 安装&配置好 host 和 masterKey 后务必手动刷新一次。
+
 
 ## 开发环境
 
@@ -9,23 +52,6 @@ Halo 2.0 插件开发快速开始模板。
 所需环境：
 
 1. Java 17
-2. Node 18
-3. pnpm 8
-4. Docker (可选)
-
-克隆项目：
-
-```bash
-git clone git@github.com:halo-sigs/plugin-starter.git
-
-# 或者当你 fork 之后
-
-git clone git@github.com:{your_github_id}/plugin-starter.git
-```
-
-```bash
-cd path/to/plugin-starter
-```
 
 ### 运行方式 1（推荐）
 
@@ -70,7 +96,7 @@ halo:
   plugin:
     runtime-mode: development
     fixedPluginPath:
-      - "/path/to/plugin-starter"
+      - "/path/to/halo-plugin-meilisearch"
 ```
 
 最后重启 Halo 项目即可。
