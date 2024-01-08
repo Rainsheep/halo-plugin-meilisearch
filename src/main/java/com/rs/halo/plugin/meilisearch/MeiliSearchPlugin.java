@@ -1,5 +1,6 @@
-package run.halo.starter;
+package com.rs.halo.plugin.meilisearch;
 
+import lombok.extern.slf4j.Slf4j;
 import org.pf4j.PluginWrapper;
 import org.springframework.stereotype.Component;
 import run.halo.app.plugin.BasePlugin;
@@ -12,20 +13,21 @@ import run.halo.app.plugin.BasePlugin;
  * @author guqing
  * @since 1.0.0
  */
+@Slf4j
 @Component
-public class StarterPlugin extends BasePlugin {
+public class MeiliSearchPlugin extends BasePlugin {
 
-    public StarterPlugin(PluginWrapper wrapper) {
+    public MeiliSearchPlugin(PluginWrapper wrapper) {
         super(wrapper);
     }
 
     @Override
     public void start() {
-        System.out.println("插件启动成功！");
+        log.info("MeiliSearch plugin started");
     }
 
     @Override
     public void stop() {
-        System.out.println("插件停止！");
+        log.info("MeiliSearch plugin stop");
     }
 }

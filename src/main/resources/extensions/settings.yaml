@@ -1,0 +1,24 @@
+apiVersion: v1alpha1
+kind: Setting
+metadata:
+  name: plugin-meilisearch-settings
+spec:
+  forms:
+    - group: base
+      label: 基本设置
+      formSchema:
+        - $formkit: text
+          label: host
+          name: host
+          validation: required
+          value: ''
+        - $formkit: text
+          label: masterKey
+          name: masterKey
+          validation: required
+          value: ''
+        - $formkit: text
+          label: 搜索结果长度
+          name: cropLength
+          validation: required|Number
+          value: '80'
