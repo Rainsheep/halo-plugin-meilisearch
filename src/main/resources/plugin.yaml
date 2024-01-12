@@ -13,7 +13,7 @@ spec:
   settingName: plugin-meilisearch-settings
   homepage: https://github.com/Rainsheep/halo-plugin-meilisearch
   displayName: "美丽搜索"
-  description: "支持集成美丽搜索，基于"
+  description: "支持集成美丽搜索，基于 meilisearch 实现搜索功能"
   license:
     - name: "GPL-3.0"
       url: "https://github.com/Rainsheep/halo-plugin-meilisearch/blob/main/LICENSE"
