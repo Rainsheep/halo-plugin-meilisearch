@@ -1,7 +1,9 @@
 package com.rs.halo.plugin.meilisearch.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meilisearch.sdk.SearchRequest;
+import com.meilisearch.sdk.exceptions.MeilisearchException;
 import com.meilisearch.sdk.model.Searchable;
 import com.rs.halo.plugin.meilisearch.bean.Document;
 import com.rs.halo.plugin.meilisearch.config.MeiliSearchSetting;
@@ -59,11 +61,16 @@ public class MeiliSearchPostService implements PostSearchService {
     }
 
     @Override
-    public void addDocuments(List<PostDoc> list) throws Exception {
-        log.info("add documents: {}", list.stream().map(PostDoc::title).toList());
-        IndexHolder.getIndex().addDocumentsInBatches(
-            objectMapper.writeValueAsString(Document.convertFromPostDocList(list)), list.size(),
-            "name");
+    public void addDocuments(List<PostDoc> list) {
+        List<String> documentsTitles = list.stream().map(PostDoc::title).toList();
+        log.info("add documents: {}", documentsTitles);
+        try {
+            IndexHolder.getIndex().addDocumentsInBatches(
+                objectMapper.writeValueAsString(Document.convertFromPostDocList(list)), list.size(),
+                "name");
+        } catch (MeilisearchException | JsonProcessingException e) {
+            log.error("add documents error, documents: {}", documentsTitles, e);
+        }
     }
 
     @Override
