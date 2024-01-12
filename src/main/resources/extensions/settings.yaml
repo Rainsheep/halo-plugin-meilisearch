@@ -11,12 +11,12 @@ spec:
           label: host
           name: host
           validation: required
-          value: ''
+          value: 'http://meilisearch:7700'
         - $formkit: text
           label: masterKey
           name: masterKey
           validation: required
-          value: ''
+          value: '95d031f029c0f93289791d39f01a7f42a2211973'
         - $formkit: text
           label: 搜索结果长度
           name: cropLength

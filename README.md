@@ -1,102 +1,84 @@
-# halo-plugin-meilisearch
+# 更强大的搜索功能
 
-## 介绍
-支持 hal 集成 meilisearch，更准确、更强大的搜索功能。
+## 功能介绍
 
-此插件与搜索组件不冲突，需要安装搜索组件。
+**提供更为强大的搜索功能，搜索更加精确**。
 
-## 使用方式
+我有一篇名为《Java学习笔记-基础篇(1)》的文章。
 
-**使用 meiliSearch Cloud 或者自己搭建 meiliSearch 服务都可以。**
+![官方原生搜索结果](https://rainsheep.oss-cn-beijing.aliyuncs.com/blog/2024/01/1705073153-85c.png)
 
-### 搭建 meilisearch
+![插件搜索结果](https://rainsheep.oss-cn-beijing.aliyuncs.com/blog/2024/01/1705073724-3e2.png)
 
-docker-compose.yml
+## 插件原理
+
+插件搜索功能基于 [meilisearch](https://www.meilisearch.com)，做了适配工作。
+
+## 使用教程
+
+### 启动 meilisearch（可选）
+
+> 如果已有 meilisearch 服务或者使用 [meilisearch cloud](https://www.meilisearch.com/cloud)，则不需要此步。
+> 
+> 当然，你也可以通过别的方式搭建 meilisearch
+
+修改 docker-compose.yml
 
 ```yaml
 version: "3"
 
 services:
+  halo:
+    image: halohub/halo:2.11
+    container_name: halo
+    restart: on-failure:3
+    networks:
+      - halo_network
+    volumes:
+      - ./halo2:/root/.halo2
+    ports:
+      - 8090:8090
+    command:
+      # 修改为自己已有的 MySQL 配置
+      - --spring.r2dbc.url=r2dbc:pool:mysql://localhost:3306/halo
+      - --spring.r2dbc.username=root
+      - --spring.r2dbc.password=
+      - --spring.sql.init.platform=mysql
+      # 外部访问地址，请根据实际需要修改
+      - --halo.external-url=http://localhost:8090/
+
+  # 这部分为新增内容，创建一个 meilisearch 容器
   meilisearch:
     image: getmeili/meilisearch:v1.5
     container_name: meilisearch
     restart: on-failure:3
+    networks:
+      - halo_network
     ports:
-      - 7700:7700
+        - 7700:7700
     volumes:
       - ./meili_data:/meili_data
     environment:
       - MEILI_ENV=production
+      # 可以改成自己的密码，对长度有限制，不建议修改
       - MEILI_MASTER_KEY=95d031f029c0f93289791d39f01a7f42a2211973
       - MEILI_NO_ANALYTICS=true
+
+networks:
+    halo_network:
 ```
 
 * MEILI_MASTER_KEY 可自定义
 
+通过 `docker compose up -d` 启动 halo 和 meilisearch。 
+
 ### 设置插件
+
 进入插件详情 -> 基本设置，填写 meiliseach 的 host、masterKey、单条搜索结果的长度。
 
-### 已知问题
+![设置](https://oss.rainsheep.cn/blog/2024/01/1705076571-cc7.png)
 
-#### 1. 更改设置后不生效
-更新设置后，需重启插件方可生效。
-
-#### 2. 搜索不到文章
-可能是文章未被索引导致，需进入仪表盘 → 刷新搜索引擎。 安装&配置好 host 和 masterKey 后务必手动刷新一次。
+**设置完成后，务必进入仪表盘 → 刷新搜索引擎，否则可能搜不到文章**
 
 
-## 开发环境
 
-插件开发的详细文档请查阅：<https://docs.halo.run/developer-guide/plugin/hello-world>
-
-所需环境：
-
-1. Java 17
-
-### 运行方式 1（推荐）
-
-> 此方式需要本地安装 Docker
-
-```bash
-# macOS / Linux
-./gradlew pnpmInstall
-
-# Windows
-./gradlew.bat pnpmInstall
-```
-
-```bash
-# macOS / Linux
-./gradlew haloServer
-
-# Windows
-./gradlew.bat haloServer
-```
-
-执行此命令后，会自动创建一个 Halo 的 Docker 容器并加载当前的插件，更多文档可查阅：<https://github.com/halo-sigs/halo-gradle-plugin>
-
-### 运行方式 2
-
-> 此方式需要使用源码运行 Halo
-
-编译插件：
-
-```bash
-# macOS / Linux
-./gradlew build
-
-# Windows
-./gradlew.bat build
-```
-
-修改 Halo 配置文件：
-
-```yaml
-halo:
-  plugin:
-    runtime-mode: development
-    fixedPluginPath:
-      - "/path/to/halo-plugin-meilisearch"
-```
-
-最后重启 Halo 项目即可。
