@@ -74,11 +74,20 @@ networks:
 
 ### 设置插件
 
+> 插件需配合 [搜索组件](https://www.halo.run/store/apps/app-DlacW) 一起使用，搜索组件提供了前端界面， Meilisearch 提供了后端搜索服务。
+
 进入插件详情 -> 基本设置，填写 meiliseach 的 host、masterKey、单条搜索结果的长度。
 
 ![设置](https://oss.rainsheep.cn/blog/2024/01/1705076571-cc7.png)
 
 **设置完成后，务必进入仪表盘 → 刷新搜索引擎，否则可能搜不到文章**
+
+## 代办事项
+
+- [ ] 插件启动/更新设置后，自动刷新索引。
+- [ ] 使用 DefaultExtensionGetter#getEnabledExtensionByDefinition 获取 ExtensionPoint。
+- [ ] 将 meilisearch 集成到插件中，不再需要单独启动。
+
 
 
 

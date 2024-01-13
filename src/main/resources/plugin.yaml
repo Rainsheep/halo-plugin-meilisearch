@@ -1,19 +1,19 @@
 apiVersion: plugin.halo.run/v1alpha1
 kind: Plugin
 metadata:
-  name: PluginMeiliSearch
+  name: Meilisearch
 spec:
   enabled: true
   requires: ">=2.10.0"
   author:
     name: Rainsheep
     website: https://blog.rainsheep.cn
-  logo: https://www.meilisearch.com/favicon.svg
-  configMapName: plugin-meilisearch-configmap
-  settingName: plugin-meilisearch-settings
+  logo: logo.svg
+  configMapName: meilisearch-configmap
+  settingName: meilisearch-settings
   homepage: https://github.com/Rainsheep/halo-plugin-meilisearch
-  displayName: "美丽搜索"
-  description: "支持集成美丽搜索，基于 meilisearch 实现搜索功能"
+  displayName: "Meilisearch"
+  description: "集成 Meilisearch，为 Halo 2.0 提供更强大、更精确、更易用的搜索功能。"
   license:
     - name: "GPL-3.0"
       url: "https://github.com/Rainsheep/halo-plugin-meilisearch/blob/main/LICENSE"

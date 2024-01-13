@@ -1,7 +1,7 @@
 apiVersion: v1alpha1
 kind: Setting
 metadata:
-  name: plugin-meilisearch-settings
+  name: meilisearch-settings
 spec:
   forms:
     - group: base

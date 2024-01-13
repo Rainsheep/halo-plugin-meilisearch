@@ -1,6 +1,6 @@
 package com.rs.halo.plugin.meilisearch.config;
 
-public class MeiliSearchSetting {
+public class MeilisearchSetting {
     public static final int DEFAULT_CROP_LENGTH = 80;
 
     public static String HOST = "";

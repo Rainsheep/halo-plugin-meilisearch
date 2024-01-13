@@ -6,7 +6,7 @@ import com.meilisearch.sdk.SearchRequest;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
 import com.meilisearch.sdk.model.Searchable;
 import com.rs.halo.plugin.meilisearch.bean.Document;
-import com.rs.halo.plugin.meilisearch.config.MeiliSearchSetting;
+import com.rs.halo.plugin.meilisearch.config.MeilisearchSetting;
 import com.rs.halo.plugin.meilisearch.utils.IndexHolder;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +26,7 @@ import run.halo.app.search.post.PostSearchService;
 @Service
 @RequiredArgsConstructor
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class MeiliSearchPostService implements PostSearchService {
+public class MeilisearchPostService implements PostSearchService {
 
     private static final String[] highlightAttributes = {"title", "excerpt", "content"};
     private static final String[] cropAttributes = {"excerpt", "content"};
@@ -41,7 +41,7 @@ public class MeiliSearchPostService implements PostSearchService {
                 .q(searchParam.getKeyword())
                 .limit(searchParam.getLimit())
                 .attributesToCrop(cropAttributes)
-                .cropLength(MeiliSearchSetting.CROP_LENGTH)
+                .cropLength(MeilisearchSetting.CROP_LENGTH)
                 .cropMarker("")
                 .attributesToHighlight(highlightAttributes)
                 .highlightPreTag(searchParam.getHighlightPreTag())

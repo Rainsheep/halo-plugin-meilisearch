@@ -1,8 +1,8 @@
 package com.rs.halo.plugin.meilisearch.reconciler;
 
-import static com.rs.halo.plugin.meilisearch.config.MeiliSearchSetting.DEFAULT_CROP_LENGTH;
+import static com.rs.halo.plugin.meilisearch.config.MeilisearchSetting.DEFAULT_CROP_LENGTH;
 
-import com.rs.halo.plugin.meilisearch.config.MeiliSearchSetting;
+import com.rs.halo.plugin.meilisearch.config.MeilisearchSetting;
 import com.rs.halo.plugin.meilisearch.utils.IndexHolder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,7 @@ import run.halo.app.plugin.ReactiveSettingFetcher;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class MeiliSearchReconciler implements Reconciler<Reconciler.Request> {
+public class MeilisearchReconciler implements Reconciler<Reconciler.Request> {
 
     private final ReactiveSettingFetcher settingFetcher;
 
@@ -25,7 +25,7 @@ public class MeiliSearchReconciler implements Reconciler<Reconciler.Request> {
     @Override
     public Result reconcile(Request request) {
         String name = request.name();
-        if (!isMeiliSearchSetting(name)) {
+        if (!isMeilisearchSetting(name)) {
             return Result.doNotRetry();
         }
         loadPluginSetting();
@@ -35,8 +35,8 @@ public class MeiliSearchReconciler implements Reconciler<Reconciler.Request> {
     private void loadPluginSetting() {
         settingFetcher.get("base")
             .doOnSuccess(baseSetting -> {
-                log.info("MeiliSearch setting update: {}", baseSetting);
-                MeiliSearchSetting.updateSetting(
+                log.info("Meilisearch setting update: {}", baseSetting);
+                MeilisearchSetting.updateSetting(
                     baseSetting.path("host").asText(DEFAULT_EMPTY_STRING),
                     baseSetting.path("masterKey").asText(DEFAULT_EMPTY_STRING),
                     baseSetting.path("cropLength").asInt(DEFAULT_CROP_LENGTH));
@@ -50,7 +50,7 @@ public class MeiliSearchReconciler implements Reconciler<Reconciler.Request> {
         return builder.extension(new ConfigMap()).build();
     }
 
-    private boolean isMeiliSearchSetting(String name) {
-        return "plugin-meilisearch-configmap".equals(name);
+    private boolean isMeilisearchSetting(String name) {
+        return "meilisearch-configmap".equals(name);
     }
 }
