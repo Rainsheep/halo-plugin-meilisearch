@@ -86,6 +86,7 @@ networks:
 
 - [ ] 插件启动/更新设置后，自动刷新索引。
 - [ ] 使用 DefaultExtensionGetter#getEnabledExtensionByDefinition 获取 ExtensionPoint。
+- [ ] 对搜索内容进行后置处理、删除图片信息等。
 - [ ] 将 meilisearch 集成到插件中，不再需要单独启动。
 
 
