@@ -2,10 +2,11 @@ package com.rs.halo.plugin.meilisearch.reconciler;
 
 import static com.rs.halo.plugin.meilisearch.config.MeilisearchSetting.DEFAULT_CROP_LENGTH;
 
+import cn.hutool.core.util.StrUtil;
 import com.rs.halo.plugin.meilisearch.config.MeilisearchSetting;
-import com.rs.halo.plugin.meilisearch.utils.IndexHolder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import run.halo.app.extension.ConfigMap;
 import run.halo.app.extension.controller.Controller;
@@ -20,7 +21,7 @@ public class MeilisearchReconciler implements Reconciler<Reconciler.Request> {
 
     private final ReactiveSettingFetcher settingFetcher;
 
-    public static final String DEFAULT_EMPTY_STRING = "";
+    private final ApplicationContext applicationContext;
 
     @Override
     public Result reconcile(Request request) {
@@ -33,16 +34,15 @@ public class MeilisearchReconciler implements Reconciler<Reconciler.Request> {
     }
 
     private void loadPluginSetting() {
-        settingFetcher.get("base")
-            .doOnSuccess(baseSetting -> {
-                log.info("Meilisearch setting update: {}", baseSetting);
-                MeilisearchSetting.updateSetting(
-                    baseSetting.path("host").asText(DEFAULT_EMPTY_STRING),
-                    baseSetting.path("masterKey").asText(DEFAULT_EMPTY_STRING),
+        settingFetcher.get("base").doOnSuccess(baseSetting -> {
+            log.info("Meilisearch setting update: {}", baseSetting);
+            MeilisearchSetting newSetting =
+                new MeilisearchSetting(baseSetting.path("host").asText(StrUtil.EMPTY),
+                    baseSetting.path("masterKey").asText(StrUtil.EMPTY),
                     baseSetting.path("cropLength").asInt(DEFAULT_CROP_LENGTH));
-                IndexHolder.resetIndex();
-                // todo update index document
-            }).subscribe();
+            MeilisearchSetting.SETTING_CACHE = newSetting;
+            applicationContext.publishEvent(newSetting);
+        }).subscribe();
     }
 
     @Override

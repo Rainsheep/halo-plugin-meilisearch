@@ -20,6 +20,7 @@ dependencies {
     implementation('com.meilisearch.sdk:meilisearch-java:0.12.0') {
         exclude group: 'com.fasterxml.jackson.core', module: 'jackson-databind'
     }
+    implementation 'cn.hutool:hutool-all:5.8.25'
 
     testImplementation 'run.halo.app:api'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

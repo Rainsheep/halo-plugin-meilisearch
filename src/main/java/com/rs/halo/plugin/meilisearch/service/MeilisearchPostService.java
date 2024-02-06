@@ -7,7 +7,7 @@ import com.meilisearch.sdk.exceptions.MeilisearchException;
 import com.meilisearch.sdk.model.Searchable;
 import com.rs.halo.plugin.meilisearch.bean.Document;
 import com.rs.halo.plugin.meilisearch.config.MeilisearchSetting;
-import com.rs.halo.plugin.meilisearch.utils.IndexHolder;
+import com.rs.halo.plugin.meilisearch.utils.MeilisearchClientHolder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -32,23 +32,20 @@ public class MeilisearchPostService implements PostSearchService {
     private static final String[] cropAttributes = {"excerpt", "content"};
 
     private final ObjectMapper objectMapper;
+    private final MeilisearchClientHolder meilisearchClientHolder;
 
     @Override
     public SearchResult<PostHit> search(SearchParam searchParam) throws Exception {
         log.info("search keyword: {}", searchParam.getKeyword());
         SearchRequest searchRequest =
-            SearchRequest.builder()
-                .q(searchParam.getKeyword())
-                .limit(searchParam.getLimit())
+            SearchRequest.builder().q(searchParam.getKeyword()).limit(searchParam.getLimit())
                 .attributesToCrop(cropAttributes)
-                .cropLength(MeilisearchSetting.CROP_LENGTH)
-                .cropMarker("")
+                .cropLength(MeilisearchSetting.SETTING_CACHE.getCropLength()).cropMarker("")
                 .attributesToHighlight(highlightAttributes)
                 .highlightPreTag(searchParam.getHighlightPreTag())
-                .highlightPostTag(searchParam.getHighlightPostTag())
-                .build();
+                .highlightPostTag(searchParam.getHighlightPostTag()).build();
 
-        Searchable searchResult = IndexHolder.getIndex().search(searchRequest);
+        Searchable searchResult = meilisearchClientHolder.getIndex().search(searchRequest);
 
         var hits = Document.convertToPostHitList(convert(searchResult.getHits()));
         var result = new SearchResult<PostHit>();
@@ -65,7 +62,7 @@ public class MeilisearchPostService implements PostSearchService {
         List<String> documentsTitles = list.stream().map(PostDoc::title).toList();
         log.info("add documents: {}", documentsTitles);
         try {
-            IndexHolder.getIndex().addDocumentsInBatches(
+            meilisearchClientHolder.getIndex().addDocumentsInBatches(
                 objectMapper.writeValueAsString(Document.convertFromPostDocList(list)), list.size(),
                 "name");
         } catch (MeilisearchException | JsonProcessingException e) {
@@ -76,13 +73,13 @@ public class MeilisearchPostService implements PostSearchService {
     @Override
     public void removeDocuments(Set<String> names) throws Exception {
         log.info("remove documents: {}", names);
-        IndexHolder.getIndex().deleteDocuments(names.stream().toList());
+        meilisearchClientHolder.getIndex().deleteDocuments(names.stream().toList());
     }
 
     @Override
     public void removeAllDocuments() throws Exception {
         log.info("remove all documents");
-        IndexHolder.getIndex().deleteAllDocuments();
+        meilisearchClientHolder.getIndex().deleteAllDocuments();
     }
 
     private List<Document> convert(List<HashMap<String, Object>> hits) {
