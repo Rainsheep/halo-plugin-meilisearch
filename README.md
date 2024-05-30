@@ -31,7 +31,7 @@ version: "3"
 
 services:
   halo:
-    image: halohub/halo:2.11
+    image: halohub/halo:2.15.2
     container_name: halo
     restart: on-failure:3
     networks:
@@ -51,15 +51,13 @@ services:
 
   # 这部分为新增内容，创建一个 meilisearch 容器
   meilisearch:
-    image: getmeili/meilisearch:v1.5
+    image: getmeili/meilisearch:v1.8
     container_name: meilisearch
     restart: on-failure:3
     networks:
       - halo_network
     ports:
         - 7700:7700
-    volumes:
-      - ./meili_data:/meili_data
     environment:
       - MEILI_ENV=production
       # 可以改成自己的密码，对长度有限制，不建议修改
@@ -83,6 +81,8 @@ networks:
 ![设置](https://oss.rainsheep.cn/blog/2024/01/1705076571-cc7.png)
 
 **设置完成后，务必进入仪表盘 → 刷新搜索引擎，否则可能搜不到文章**
+
+**每次启动容器(包括删除后的启动)，都需要手动刷新索引**
 
 ## 代办事项
 
