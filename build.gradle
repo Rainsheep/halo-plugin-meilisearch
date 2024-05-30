@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id "io.freefair.lombok" version "8.0.1"
-    id "run.halo.plugin.devtools" version "0.0.7"
+    id "run.halo.plugin.devtools" version "0.0.9"
 }
 
 group 'com.rs'
@@ -15,9 +15,9 @@ repositories {
 }
 
 dependencies {
-    implementation platform('run.halo.tools.platform:plugin:2.10.0-SNAPSHOT')
+    implementation platform('run.halo.tools.platform:plugin:2.15.0-SNAPSHOT')
     compileOnly 'run.halo.app:api'
-    implementation('com.meilisearch.sdk:meilisearch-java:0.11.5') {
+    implementation('com.meilisearch.sdk:meilisearch-java:0.12.0') {
         exclude group: 'com.fasterxml.jackson.core', module: 'jackson-databind'
     }
 
