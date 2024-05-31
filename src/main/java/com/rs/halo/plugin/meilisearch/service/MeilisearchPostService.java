@@ -35,15 +35,19 @@ public class MeilisearchPostService implements PostSearchService {
     private final MeilisearchClientHolder meilisearchClientHolder;
 
     @Override
-    public SearchResult<PostHit> search(SearchParam searchParam) throws Exception {
+    public SearchResult<PostHit> search(SearchParam searchParam) {
         log.info("search keyword: {}", searchParam.getKeyword());
         SearchRequest searchRequest =
-            SearchRequest.builder().q(searchParam.getKeyword()).limit(searchParam.getLimit())
+            SearchRequest.builder()
+                .q(searchParam.getKeyword())
+                .limit(searchParam.getLimit())
                 .attributesToCrop(cropAttributes)
-                .cropLength(MeilisearchSetting.SETTING_CACHE.getCropLength()).cropMarker("")
+                .cropLength(MeilisearchSetting.cropLength)
+                .cropMarker("")
                 .attributesToHighlight(highlightAttributes)
                 .highlightPreTag(searchParam.getHighlightPreTag())
-                .highlightPostTag(searchParam.getHighlightPostTag()).build();
+                .highlightPostTag(searchParam.getHighlightPostTag())
+                .build();
 
         Searchable searchResult = meilisearchClientHolder.getIndex().search(searchRequest);
 

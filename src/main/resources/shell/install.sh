@@ -1,7 +1,6 @@
 #!/bin/sh
 
-# This script can optionally use a GitHub token to increase your request limit (for example, if using this script in a CI).
-# To use a GitHub token, pass it through the GITHUB_PAT environment variable.
+# 所本地不存在指定版本 meilisearch 的二进制文件，则远程下载 , 并且删除旧版本的文件
 
 # GLOBALS
 
@@ -14,12 +13,16 @@ DEFAULT='\033[0m'
 PNAME='meilisearch'
 
 # GitHub Release address
-GITHUB_REL='https://github.com/meilisearch/meilisearch/releases/download/'
+GITHUB_REL='https://oss.rainsheep.cn/meilisearch'
+
+LATEST=$1
+SERVICE_PATH=$2
 
 # Gets the version of the latest stable version of Meilisearch by setting the $latest variable.
 # Returns 0 in case of success, 1 otherwise.
 get_latest() {
-    latest="1.6.1"
+    latest="$LATEST"
+    echo "latest version: $latest"
     return 0
 }
 
@@ -114,6 +117,20 @@ fill_release_variables() {
      fi
 }
 
+# 删除所有旧文件夹
+delete_old_files() {
+    ls -d */ | while read folder; do
+        # 获取文件夹的名称（不包括路径）
+        folder_name=${folder%/}
+
+        # 如果文件夹名称不等于 $latest，则删除该文件夹及其内容
+        if [ "$folder_name" != "$latest" ]; then
+            rm -rf "$folder"
+            echo "delete old version meilisearch folder: $folder_name"
+        fi
+    done
+}
+
 download_binary() {
     fill_release_variables
     echo "Downloading Meilisearch binary $latest for $os, architecture $archi..."
@@ -126,10 +143,29 @@ download_binary() {
             release_file="$PNAME-$os-$archi"
             binary_name="$PNAME"
     esac
-    mkdir -p /application/meilisearch
-    cd /application/meilisearch
+    cd $SERVICE_PATH
+    delete_old_files
+    mkdir $latest
+    cd $latest
+    file_url="$GITHUB_REL/$latest/$release_file"
+    echo "meilisearch file remote url: $file_url"
+    # 判断 $binary_name 文件的大小和 远程文件大小是否一致
+    if [ -f "$binary_name" ]; then
+        local_size=$(ls -l $binary_name | awk '{print $5}' | tr -d '\n\r')
+        remote_size=$(curl -sI $file_url | grep -i Content-Length | awk '{print $2}' | tr -d '\n\r')
+        echo "local_size: $local_size, remote_size: $remote_size"
+        if [ "$local_size" = "$remote_size" ]; then
+            echo "Meilisearch binary $latest for $os, architecture $archi already exists."
+            success_usage
+            return 0
+        else
+            echo "Delete the old file and download the new file."
+            rm -f "$binary_name"
+        fi
+    fi
+
     # Fetch the Meilisearch binary.
-    curl --fail -OL "$GITHUB_REL/$latest/$release_file"
+    curl --fail -OL $file_url
     if [ $? -ne 0 ]; then
         fetch_release_failure_usage
         exit 1
@@ -140,7 +176,6 @@ download_binary() {
 }
 
 # MAIN
-
 main() {
     download_binary
 }

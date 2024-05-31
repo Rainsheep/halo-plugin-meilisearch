@@ -1,9 +1,7 @@
 package com.rs.halo.plugin.meilisearch.reconciler;
 
-import static com.rs.halo.plugin.meilisearch.config.MeilisearchSetting.DEFAULT_CROP_LENGTH;
-
-import cn.hutool.core.util.StrUtil;
 import com.rs.halo.plugin.meilisearch.config.MeilisearchSetting;
+import com.rs.halo.plugin.meilisearch.event.ConfigUpdatedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
@@ -34,14 +32,10 @@ public class MeilisearchReconciler implements Reconciler<Reconciler.Request> {
     }
 
     private void loadPluginSetting() {
-        settingFetcher.get("base").doOnSuccess(baseSetting -> {
-            log.info("Meilisearch setting update: {}", baseSetting);
-            MeilisearchSetting newSetting =
-                new MeilisearchSetting(baseSetting.path("host").asText(StrUtil.EMPTY),
-                    baseSetting.path("masterKey").asText(StrUtil.EMPTY),
-                    baseSetting.path("cropLength").asInt(DEFAULT_CROP_LENGTH));
-            MeilisearchSetting.SETTING_CACHE = newSetting;
-            applicationContext.publishEvent(newSetting);
+        settingFetcher.get("base").doOnSuccess(settings -> {
+            log.info("Meilisearch setting update: {}", settings);
+            MeilisearchSetting.resetFromJsonNode(settings);
+            applicationContext.publishEvent(new ConfigUpdatedEvent(this));
         }).subscribe();
     }
 

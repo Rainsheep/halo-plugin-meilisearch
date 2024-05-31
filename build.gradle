@@ -34,6 +34,23 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = "UTF-8"
 }
 
+// devtools 配置
+halo {
+    version = '2.12.2'
+    superAdminUsername = 'admin'
+    superAdminPassword = 'admin'
+    externalUrl = 'http://localhost:8090'
+    docker {
+        // windows 默认为 npipe:////./pipe/docker_engine
+        url = 'unix:///Users/rainsheep/.docker/run/docker.sock'
+        apiVersion = '1.43'
+    }
+    port = 8090
+    debug = false
+    debugPort = 5005
+    suspend = true
+}
+
 
 build {
     // build frontend before build

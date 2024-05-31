@@ -7,15 +7,23 @@ spec:
     - group: base
       label: 基本设置
       formSchema:
+        - $formkit: select
+          label: 是否使用内置 Meilisearch 服务
+          name: innerServiceEnable
+          options:
+            - label: 是
+              value: true
+            - label: 否
+              value: false
         - $formkit: text
+          if: "$innerServiceEnable === false"
           label: host
           name: host
-          validation: required
           value: 'http://meilisearch:7700'
         - $formkit: text
+          if: "$innerServiceEnable === false"
           label: masterKey
           name: masterKey
-          validation: required
           value: '95d031f029c0f93289791d39f01a7f42a2211973'
         - $formkit: text
           label: 搜索结果长度

@@ -16,8 +16,6 @@ public class MeilisearchPlugin extends BasePlugin {
     @Override
     public void start() {
         log.info("Meilisearch plugin started");
-        // 发现没有 meilisearch，则使用内置 meilisearch
-
     }
 
     @Override

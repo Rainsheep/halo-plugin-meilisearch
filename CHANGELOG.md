@@ -4,7 +4,7 @@
 
 ### 新增
 
-- 为 halo2(2.11.0) 提供 MeiliSearch(1.5) 支持
+- 为 halo2(2.11.0) 提供 Meilisearch(1.5) 支持
 
 ### 文档
 
