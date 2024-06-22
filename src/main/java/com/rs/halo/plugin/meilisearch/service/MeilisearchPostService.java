@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meilisearch.sdk.SearchRequest;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
 import com.meilisearch.sdk.model.Searchable;
-import com.rs.halo.plugin.meilisearch.bean.Document;
 import com.rs.halo.plugin.meilisearch.config.MeilisearchSetting;
 import com.rs.halo.plugin.meilisearch.utils.IndexHolder;
 import java.util.HashMap;
@@ -13,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
@@ -49,8 +49,12 @@ public class MeilisearchPostService implements PostSearchService {
                 .build();
 
         Searchable searchResult = IndexHolder.getIndex().search(searchRequest);
-
-        var hits = Document.convertToPostHitList(convert(searchResult.getHits()));
+        List<PostDoc> postDocs = convert(searchResult.getHits());
+        List<PostHit> hits = postDocs.stream().map(postDoc -> {
+            PostHit postHit = new PostHit();
+            BeanUtils.copyProperties(postDoc, postHit);
+            return postHit;
+        }).toList();
         var result = new SearchResult<PostHit>();
         result.setHits(hits);
         result.setTotal((long) searchResult.getHits().size());
@@ -66,7 +70,7 @@ public class MeilisearchPostService implements PostSearchService {
         log.info("add documents: {}", documentsTitles);
         try {
             IndexHolder.getIndex().addDocumentsInBatches(
-                objectMapper.writeValueAsString(Document.convertFromPostDocList(list)), list.size(),
+                objectMapper.writeValueAsString(list), list.size(),
                 "name");
         } catch (MeilisearchException | JsonProcessingException e) {
             log.error("add documents error, documents: {}", documentsTitles, e);
@@ -85,9 +89,9 @@ public class MeilisearchPostService implements PostSearchService {
         IndexHolder.getIndex().deleteAllDocuments();
     }
 
-    private List<Document> convert(List<HashMap<String, Object>> hits) {
+    private List<PostDoc> convert(List<HashMap<String, Object>> hits) {
         return hits.stream()
-            .map(hit -> objectMapper.convertValue(hit.get("_formatted"), Document.class)).toList();
+            .map(hit -> objectMapper.convertValue(hit.get("_formatted"), PostDoc.class)).toList();
     }
 }
 
