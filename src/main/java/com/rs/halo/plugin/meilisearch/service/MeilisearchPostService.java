@@ -9,89 +9,95 @@ import com.rs.halo.plugin.meilisearch.config.MeilisearchSetting;
 import com.rs.halo.plugin.meilisearch.utils.IndexHolder;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.StreamSupport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
-import run.halo.app.search.SearchParam;
+import run.halo.app.search.HaloDocument;
+import run.halo.app.search.SearchEngine;
 import run.halo.app.search.SearchResult;
-import run.halo.app.search.post.PostDoc;
-import run.halo.app.search.post.PostHit;
-import run.halo.app.search.post.PostSearchService;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class MeilisearchPostService implements PostSearchService {
+public class MeilisearchPostService implements SearchEngine {
 
-    private static final String[] highlightAttributes = {"title", "excerpt", "content"};
-    private static final String[] cropAttributes = {"excerpt", "content"};
+    private static final String[] highlightAttributes =
+        {"title", "description", "content", "categories", "tags"};
+    private static final String[] searchAttributes = {"title", "description", "content"};
+    private static final String[] cropAttributes = {"description", "content"};
 
     private final ObjectMapper objectMapper;
 
     @Override
-    public SearchResult<PostHit> search(SearchParam searchParam) throws Exception {
-        log.info("search keyword: {}", searchParam.getKeyword());
-        SearchRequest searchRequest =
-            SearchRequest.builder()
-                .q(searchParam.getKeyword())
-                .limit(searchParam.getLimit())
-                .attributesToCrop(cropAttributes)
-                .cropLength(MeilisearchSetting.CROP_LENGTH)
-                .cropMarker("")
-                .attributesToHighlight(highlightAttributes)
-                .highlightPreTag(searchParam.getHighlightPreTag())
-                .highlightPostTag(searchParam.getHighlightPostTag())
-                .build();
-
-        Searchable searchResult = IndexHolder.getIndex().search(searchRequest);
-        List<PostDoc> postDocs = convert(searchResult.getHits());
-        List<PostHit> hits = postDocs.stream().map(postDoc -> {
-            PostHit postHit = new PostHit();
-            BeanUtils.copyProperties(postDoc, postHit);
-            return postHit;
-        }).toList();
-        var result = new SearchResult<PostHit>();
-        result.setHits(hits);
-        result.setTotal((long) searchResult.getHits().size());
-        result.setKeyword(searchParam.getKeyword());
-        result.setLimit(searchParam.getLimit());
-        result.setProcessingTimeMillis(searchResult.getProcessingTimeMs());
-        return result;
+    public void init() {
+        // Do nothing
     }
 
     @Override
-    public void addDocuments(List<PostDoc> list) {
-        List<String> documentsTitles = list.stream().map(PostDoc::title).toList();
-        log.info("add documents: {}", documentsTitles);
+    public void addOrUpdate(Iterable<HaloDocument> iterable) {
+        List<HaloDocument> documents = StreamSupport.stream(iterable.spliterator(), false).toList();
+        List<String> titles = documents.stream().map(HaloDocument::getTitle).toList();
+        log.info("add documents: {}", titles);
+        documents.forEach(doc -> log.info("add document: {}", doc));
+
         try {
-            IndexHolder.getIndex().addDocumentsInBatches(
-                objectMapper.writeValueAsString(list), list.size(),
-                "name");
+            String documentsJson = objectMapper.writeValueAsString(documents);
+            log.info("add documents json: {}", documentsJson);
+            IndexHolder.getIndex().addDocumentsInBatches(documentsJson);
         } catch (MeilisearchException | JsonProcessingException e) {
-            log.error("add documents error, documents: {}", documentsTitles, e);
+            log.error("add documents error, documents: {}", titles, e);
         }
+
     }
 
     @Override
-    public void removeDocuments(Set<String> names) throws Exception {
-        log.info("remove documents: {}", names);
-        IndexHolder.getIndex().deleteDocuments(names.stream().toList());
+    public void deleteDocument(Iterable<String> ids) {
+        List<String> idList = StreamSupport.stream(ids.spliterator(), false).toList();
+        log.info("remove documents: {}", idList);
+        IndexHolder.getIndex().deleteDocuments(idList);
     }
 
     @Override
-    public void removeAllDocuments() throws Exception {
+    public void deleteAll() {
         log.info("remove all documents");
         IndexHolder.getIndex().deleteAllDocuments();
     }
 
-    private List<PostDoc> convert(List<HashMap<String, Object>> hits) {
+    @Override
+    public SearchResult search(SearchOption searchOption) {
+        log.info("search keyword: {}", searchOption.getKeyword());
+        SearchRequest searchRequest =
+            SearchRequest.builder()
+                .q(searchOption.getKeyword())
+                .limit(searchOption.getLimit())
+                .attributesToCrop(cropAttributes)
+                .cropLength(MeilisearchSetting.CROP_LENGTH)
+                .cropMarker("")
+                .attributesToSearchOn(searchAttributes)
+                .attributesToHighlight(highlightAttributes)
+                .highlightPreTag(searchOption.getHighlightPreTag())
+                .highlightPostTag(searchOption.getHighlightPostTag())
+                .build();
+
+        Searchable searchResult = IndexHolder.getIndex().search(searchRequest);
+        log.info("search result: {}", searchResult.getHits());
+        var result = new SearchResult();
+        result.setHits(convert(searchResult.getHits()));
+        result.setTotal((long) searchResult.getHits().size());
+        result.setKeyword(searchOption.getKeyword());
+        result.setLimit(searchOption.getLimit());
+        result.setProcessingTimeMillis(searchResult.getProcessingTimeMs());
+        return result;
+    }
+
+    private List<HaloDocument> convert(List<HashMap<String, Object>> hits) {
         return hits.stream()
-            .map(hit -> objectMapper.convertValue(hit.get("_formatted"), PostDoc.class)).toList();
+            .map(hit -> objectMapper.convertValue(hit.get("_formatted"), HaloDocument.class))
+            .toList();
     }
 }
 
