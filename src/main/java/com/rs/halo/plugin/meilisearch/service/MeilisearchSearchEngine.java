@@ -9,6 +9,7 @@ import com.rs.halo.plugin.meilisearch.config.MeilisearchSetting;
 import com.rs.halo.plugin.meilisearch.utils.IndexHolder;
 import java.util.HashMap;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.stream.StreamSupport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +40,7 @@ public class MeilisearchSearchEngine implements SearchEngine {
     public void addOrUpdate(Iterable<HaloDocument> iterable) {
         List<HaloDocument> documents = StreamSupport.stream(iterable.spliterator(), false).toList();
         List<String> titles = documents.stream().map(HaloDocument::getTitle).toList();
-        log.info("add documents: {}", titles);
+        log.info("addOrUpdate documents: {}", titles);
 
         try {
             String documentsJson = objectMapper.writeValueAsString(documents);
@@ -70,10 +71,21 @@ public class MeilisearchSearchEngine implements SearchEngine {
     @Override
     public SearchResult search(SearchOption searchOption) {
         log.info("search keyword: {}", searchOption.getKeyword());
+        StringJoiner filter = new StringJoiner(" AND ");
+        if (!MeilisearchSetting.searchRecycled) {
+            filter.add("recycled = false");
+        }
+        if (!MeilisearchSetting.searchUnexposed) {
+            filter.add("exposed = true");
+        }
+        if (!MeilisearchSetting.searchUnpublish) {
+            filter.add("published = true");
+        }
         SearchRequest searchRequest =
             SearchRequest.builder()
                 .q(searchOption.getKeyword())
                 .limit(searchOption.getLimit())
+                .filter(new String[] {filter.toString()})
                 .attributesToCrop(cropAttributes)
                 .cropLength(MeilisearchSetting.CROP_LENGTH)
                 .cropMarker("")
@@ -84,7 +96,6 @@ public class MeilisearchSearchEngine implements SearchEngine {
                 .build();
 
         Searchable searchResult = IndexHolder.getIndex().search(searchRequest);
-        log.info("search result: {}", searchResult.getHits());
         var result = new SearchResult();
         result.setHits(convert(searchResult.getHits()));
         result.setTotal((long) searchResult.getHits().size());

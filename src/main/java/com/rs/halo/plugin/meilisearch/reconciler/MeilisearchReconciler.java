@@ -4,6 +4,7 @@ import static com.rs.halo.plugin.meilisearch.config.MeilisearchSetting.DEFAULT_C
 
 import com.rs.halo.plugin.meilisearch.config.MeilisearchSetting;
 import com.rs.halo.plugin.meilisearch.utils.IndexHolder;
+import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -39,10 +40,15 @@ public class MeilisearchReconciler implements Reconciler<Reconciler.Request> {
                 MeilisearchSetting.updateSetting(
                     baseSetting.path("host").asText(DEFAULT_EMPTY_STRING),
                     baseSetting.path("masterKey").asText(DEFAULT_EMPTY_STRING),
-                    baseSetting.path("cropLength").asInt(DEFAULT_CROP_LENGTH));
+                    baseSetting.path("cropLength").asInt(DEFAULT_CROP_LENGTH),
+                    baseSetting.path("searchUnpublish").asBoolean(false),
+                    baseSetting.path("searchUnexposed").asBoolean(false),
+                    baseSetting.path("searchRecycled").asBoolean(false)
+                );
                 IndexHolder.resetIndex();
                 // todo update index document
-            }).subscribe();
+            })
+            .subscribe();
     }
 
     @Override

@@ -22,3 +22,18 @@ spec:
           name: cropLength
           validation: required|Number
           value: '80'
+        - $formkit: checkbox
+          name: searchUnpublish
+          label: 搜索未发布
+          help: 能够搜索非发布状态的文档
+          value: false
+        - $formkit: checkbox
+          name: searchUnexposed
+          label: 搜索私有文档
+          help: 能够搜索非公开的文档
+          value: false
+        - $formkit: checkbox
+          name: searchRecycled
+          label: 搜索已回收
+          help: 能够搜索回收站中的文档
+          value: false

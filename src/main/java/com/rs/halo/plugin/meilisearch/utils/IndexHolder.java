@@ -4,6 +4,7 @@ import com.meilisearch.sdk.Client;
 import com.meilisearch.sdk.Config;
 import com.meilisearch.sdk.Index;
 import com.meilisearch.sdk.exceptions.MeilisearchException;
+import com.meilisearch.sdk.model.Settings;
 import com.rs.halo.plugin.meilisearch.config.MeilisearchSetting;
 
 public class IndexHolder {
@@ -28,6 +29,10 @@ public class IndexHolder {
     private static Index generateIndex() throws MeilisearchException {
         Client client =
             new Client(new Config(MeilisearchSetting.HOST, MeilisearchSetting.MASTER_KEY));
-        return client.index("halo_post");
+        Index index = client.index("halo_post");
+        Settings settings = new Settings();
+        settings.setFilterableAttributes(new String[] {"published", "recycled", "exposed"});
+        index.updateSettings(settings);
+        return index;
     }
 }
