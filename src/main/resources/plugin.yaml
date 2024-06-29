@@ -4,7 +4,7 @@ metadata:
   name: Meilisearch
 spec:
   enabled: true
-  requires: ">=2.10.0"
+  requires: ">=2.17.0"
   author:
     name: Rainsheep
     website: https://blog.rainsheep.cn

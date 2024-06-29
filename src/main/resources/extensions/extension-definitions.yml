@@ -1,0 +1,9 @@
+apiVersion: plugin.halo.run/v1alpha1
+kind: ExtensionDefinition
+metadata:
+    name: search-engine-meilisearch
+spec:
+    className: com.rs.halo.plugin.meilisearch.service.MeilisearchSearchEngine
+    extensionPointName: search-engine
+    displayName: Meilisearch Search Engine
+    description: Meilisearch

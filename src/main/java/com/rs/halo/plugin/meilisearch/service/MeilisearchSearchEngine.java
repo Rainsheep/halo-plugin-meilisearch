@@ -12,18 +12,16 @@ import java.util.List;
 import java.util.stream.StreamSupport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 import run.halo.app.search.HaloDocument;
 import run.halo.app.search.SearchEngine;
+import run.halo.app.search.SearchOption;
 import run.halo.app.search.SearchResult;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Order(Ordered.HIGHEST_PRECEDENCE)
-public class MeilisearchPostService implements SearchEngine {
+public class MeilisearchSearchEngine implements SearchEngine {
 
     private static final String[] highlightAttributes =
         {"title", "description", "content", "categories", "tags"};
@@ -33,8 +31,8 @@ public class MeilisearchPostService implements SearchEngine {
     private final ObjectMapper objectMapper;
 
     @Override
-    public void init() {
-        // Do nothing
+    public boolean available() {
+        return true;
     }
 
     @Override
@@ -42,21 +40,23 @@ public class MeilisearchPostService implements SearchEngine {
         List<HaloDocument> documents = StreamSupport.stream(iterable.spliterator(), false).toList();
         List<String> titles = documents.stream().map(HaloDocument::getTitle).toList();
         log.info("add documents: {}", titles);
-        documents.forEach(doc -> log.info("add document: {}", doc));
 
         try {
             String documentsJson = objectMapper.writeValueAsString(documents);
-            log.info("add documents json: {}", documentsJson);
-            IndexHolder.getIndex().addDocumentsInBatches(documentsJson);
+            // id 做索引不知道为什么会失败
+            IndexHolder.getIndex().addDocumentsInBatches(documentsJson, 20, "metadataName");
         } catch (MeilisearchException | JsonProcessingException e) {
             log.error("add documents error, documents: {}", titles, e);
         }
-
     }
 
     @Override
     public void deleteDocument(Iterable<String> ids) {
         List<String> idList = StreamSupport.stream(ids.spliterator(), false).toList();
+        idList = idList.stream().map(s -> {
+            String[] split = s.split("-", 2);
+            return split[1];
+        }).toList();
         log.info("remove documents: {}", idList);
         IndexHolder.getIndex().deleteDocuments(idList);
     }

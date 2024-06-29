@@ -7,6 +7,7 @@ import java.time.Instant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import run.halo.app.search.HaloDocument;
 
 @Slf4j
 @Configuration

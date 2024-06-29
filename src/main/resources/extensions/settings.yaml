@@ -11,7 +11,7 @@ spec:
           label: host
           name: host
           validation: required
-          value: 'http://localhost:7700'
+          value: 'http://meilisearch:7700'
         - $formkit: text
           label: masterKey
           name: masterKey

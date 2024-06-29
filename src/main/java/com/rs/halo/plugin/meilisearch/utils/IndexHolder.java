@@ -26,7 +26,8 @@ public class IndexHolder {
     }
 
     private static Index generateIndex() throws MeilisearchException {
-        return new Client(new Config(MeilisearchSetting.HOST, MeilisearchSetting.MASTER_KEY)).index(
-            "halo_post");
+        Client client =
+            new Client(new Config(MeilisearchSetting.HOST, MeilisearchSetting.MASTER_KEY));
+        return client.index("halo_post");
     }
 }
