@@ -11,7 +11,9 @@ spec:
   logo: logo.svg
   configMapName: meilisearch-configmap
   settingName: meilisearch-settings
-  homepage: https://github.com/Rainsheep/halo-plugin-meilisearch
+  homepage: https://blog.rainsheep.cn
+  repo: https://github.com/Rainsheep/halo-plugin-meilisearch
+  issues: https://github.com/Rainsheep/halo-plugin-meilisearch/issues
   displayName: "Meilisearch"
   description: "集成 Meilisearch，为 Halo 2.0 提供更强大、更精确、更易用的搜索功能。"
   license:

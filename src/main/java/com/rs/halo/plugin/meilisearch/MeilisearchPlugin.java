@@ -1,6 +1,6 @@
 package com.rs.halo.plugin.meilisearch;
 
-import com.rs.halo.plugin.meilisearch.reconciler.MeilisearchService;
+import com.rs.halo.plugin.meilisearch.service.MeilisearchService;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;

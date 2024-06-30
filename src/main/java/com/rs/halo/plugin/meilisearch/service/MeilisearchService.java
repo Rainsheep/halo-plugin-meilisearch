@@ -1,4 +1,4 @@
-package com.rs.halo.plugin.meilisearch.reconciler;
+package com.rs.halo.plugin.meilisearch.service;
 
 import static com.rs.halo.plugin.meilisearch.config.MeilisearchSetting.DEFAULT_CROP_LENGTH;
 import static com.rs.halo.plugin.meilisearch.config.MeilisearchSetting.DEFAULT_HOST;
