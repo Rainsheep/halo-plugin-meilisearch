@@ -68,29 +68,29 @@ public class MeilisearchPlugin extends BasePlugin {
 
 
     private void stopMeilisearch() {
-        reactiveExtensionClient.get(ConfigMap.class, SystemSetting.SYSTEM_CONFIG)
-            .flatMap(config -> {
-                Map<String, String> configData = config.getData();
-                String extensionPointEnabled =
-                    configData.getOrDefault(SystemSetting.ExtensionPointEnabled.GROUP, "{}");
-                SystemSetting.ExtensionPointEnabled extensionPointEnabledSetting =
-                    JsonUtils.jsonToObject(extensionPointEnabled,
-                        SystemSetting.ExtensionPointEnabled.class);
-                LinkedHashSet<String> searchEngineSet =
-                    extensionPointEnabledSetting.getOrDefault("search-engine",
-                        new LinkedHashSet<>());
-                searchEngineSet.remove("search-engine-meilisearch");
-                if (searchEngineSet.isEmpty()) {
-                    extensionPointEnabledSetting.remove("search-engine");
-                    if (extensionPointEnabledSetting.isEmpty()) {
-                        configData.remove(SystemSetting.ExtensionPointEnabled.GROUP);
-                    }
-                } else {
-                    extensionPointEnabledSetting.put("search-engine", searchEngineSet);
-                    configData.put(SystemSetting.ExtensionPointEnabled.GROUP,
-                        JsonUtils.objectToJson(extensionPointEnabledSetting));
-                }
-                return reactiveExtensionClient.update(config);
-            }).subscribe();
+        // reactiveExtensionClient.get(ConfigMap.class, SystemSetting.SYSTEM_CONFIG)
+        //     .flatMap(config -> {
+        //         Map<String, String> configData = config.getData();
+        //         String extensionPointEnabled =
+        //             configData.getOrDefault(SystemSetting.ExtensionPointEnabled.GROUP, "{}");
+        //         SystemSetting.ExtensionPointEnabled extensionPointEnabledSetting =
+        //             JsonUtils.jsonToObject(extensionPointEnabled,
+        //                 SystemSetting.ExtensionPointEnabled.class);
+        //         LinkedHashSet<String> searchEngineSet =
+        //             extensionPointEnabledSetting.getOrDefault("search-engine",
+        //                 new LinkedHashSet<>());
+        //         searchEngineSet.remove("search-engine-meilisearch");
+        //         if (searchEngineSet.isEmpty()) {
+        //             extensionPointEnabledSetting.remove("search-engine");
+        //             if (extensionPointEnabledSetting.isEmpty()) {
+        //                 configData.remove(SystemSetting.ExtensionPointEnabled.GROUP);
+        //             }
+        //         } else {
+        //             extensionPointEnabledSetting.put("search-engine", searchEngineSet);
+        //             configData.put(SystemSetting.ExtensionPointEnabled.GROUP,
+        //                 JsonUtils.objectToJson(extensionPointEnabledSetting));
+        //         }
+        //         return reactiveExtensionClient.update(config);
+        //     }).subscribe();
     }
 }
