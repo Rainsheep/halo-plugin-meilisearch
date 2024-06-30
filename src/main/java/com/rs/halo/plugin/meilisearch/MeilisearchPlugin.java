@@ -5,12 +5,14 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import run.halo.app.extension.ConfigMap;
 import run.halo.app.extension.ReactiveExtensionClient;
 import run.halo.app.infra.SystemSetting;
 import run.halo.app.infra.utils.JsonUtils;
 import run.halo.app.plugin.BasePlugin;
+import run.halo.app.search.event.HaloDocumentRebuildRequestEvent;
 
 @Slf4j
 @Component
@@ -20,6 +22,8 @@ public class MeilisearchPlugin extends BasePlugin {
     private final ReactiveExtensionClient reactiveExtensionClient;
 
     private final MeilisearchService meilisearchService;
+
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public void start() {
@@ -46,6 +50,8 @@ public class MeilisearchPlugin extends BasePlugin {
                     JsonUtils.objectToJson(extensionPointEnabledSetting));
                 return reactiveExtensionClient.update(config);
             }).subscribe();
+
+        eventPublisher.publishEvent(new HaloDocumentRebuildRequestEvent(this));
     }
 
     @Override
