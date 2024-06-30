@@ -78,7 +78,7 @@ public class MeilisearchSearchEngine implements SearchEngine {
         if (!MeilisearchSetting.searchUnexposed) {
             filter.add("exposed = true");
         }
-        if (!MeilisearchSetting.searchUnpublish) {
+        if (!MeilisearchSetting.searchUnpublished) {
             filter.add("published = true");
         }
         SearchRequest searchRequest =
@@ -87,7 +87,7 @@ public class MeilisearchSearchEngine implements SearchEngine {
                 .limit(searchOption.getLimit())
                 .filter(new String[] {filter.toString()})
                 .attributesToCrop(cropAttributes)
-                .cropLength(MeilisearchSetting.CROP_LENGTH)
+                .cropLength(MeilisearchSetting.cropLength)
                 .cropMarker("")
                 .attributesToSearchOn(searchAttributes)
                 .attributesToHighlight(highlightAttributes)

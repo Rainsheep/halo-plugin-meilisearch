@@ -23,7 +23,7 @@ spec:
           validation: required|Number
           value: '80'
         - $formkit: checkbox
-          name: searchUnpublish
+          name: searchUnpublished
           label: 搜索未发布
           help: 能够搜索非发布状态的文档
           value: false

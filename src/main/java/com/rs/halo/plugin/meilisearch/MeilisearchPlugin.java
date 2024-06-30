@@ -1,5 +1,6 @@
 package com.rs.halo.plugin.meilisearch;
 
+import com.rs.halo.plugin.meilisearch.reconciler.MeilisearchService;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +19,13 @@ public class MeilisearchPlugin extends BasePlugin {
 
     private final ReactiveExtensionClient reactiveExtensionClient;
 
+    private final MeilisearchService meilisearchService;
+
     @Override
     public void start() {
         log.info("Meilisearch plugin started");
+        meilisearchService.loadPluginSetting();
+
         reactiveExtensionClient.get(ConfigMap.class, SystemSetting.SYSTEM_CONFIG)
             .flatMap(config -> {
                 Map<String, String> configData = config.getData();
