@@ -78,6 +78,20 @@ networks:
 * 搜索私有文档: 搜索结果中展示非公开的文档。
 * 搜索已回收: 搜索结果中展示回收站中的文档。
 
+首次启动需进入 console → 插件 → 右上角的“扩展配置” → 搜素引擎 → 选择 Meilisearch Search Engine
+
+![启动搜索引擎](https://oss.rainsheep.cn/save/image/meilisearchEnable.png)
+
+
+## FAQ
+
+### 搜索不到文档
+
+请确认进行了以下两步操作，进行后还不可以的话请反馈。
+
+1. 请确认在扩展配置中选择了 “Meilisearch Search Engine”
+2. 进入后台 → 仪表盘 → 快捷访问 → 刷新搜索引擎
+
 
 ## 代办事项
 

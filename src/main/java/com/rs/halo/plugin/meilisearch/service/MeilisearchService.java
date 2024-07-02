@@ -31,7 +31,7 @@ public class MeilisearchService implements DisposableBean {
 
     private final ApplicationEventPublisher eventPublisher;
 
-    private void updateSettingCache(JsonNode settings) {
+    private void updateSettingCache(JsonNode settings, boolean forceRebuildDocument) {
         boolean needRefresh = false;
         var newHost = settings.path("host").asText(DEFAULT_HOST);
         if (!Objects.equals(MeilisearchSetting.host, newHost)) {
@@ -52,10 +52,9 @@ public class MeilisearchService implements DisposableBean {
             settings.path("searchRecycled").asBoolean(DEFAULT_SEARCH_UNRECYCLED)
         );
 
-        IndexHolder.resetIndex();
-
-        if (needRefresh) {
+        if (needRefresh || forceRebuildDocument) {
             log.info("Request to rebuild document index due to plugin setting change.");
+            IndexHolder.resetIndex();
             eventPublisher.publishEvent(new HaloDocumentRebuildRequestEvent(this));
         }
     }
@@ -63,7 +62,7 @@ public class MeilisearchService implements DisposableBean {
     @EventListener
     void onPluginConfigUpdate(PluginConfigUpdatedEvent event) {
         log.info("Detected plugin setting change, reloading plugin setting.");
-        updateSettingCache(event.getNewConfig().get("base"));
+        updateSettingCache(event.getNewConfig().get("base"), false);
     }
 
     @EventListener
@@ -71,7 +70,7 @@ public class MeilisearchService implements DisposableBean {
         // TODO Initialize after plugin started
         log.info("Initializing plugin setting for the first startup.");
         var settings = this.settingFetcher.get("base");
-        this.updateSettingCache(settings);
+        this.updateSettingCache(settings, true);
     }
 
     @Override
