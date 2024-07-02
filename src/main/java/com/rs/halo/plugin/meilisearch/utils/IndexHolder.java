@@ -29,7 +29,7 @@ public class IndexHolder {
     private static Index generateIndex() throws MeilisearchException {
         Client client =
             new Client(new Config(MeilisearchSetting.host, MeilisearchSetting.masterKey));
-        Index index = client.index("halo_post");
+        Index index = client.index("halo");
         Settings settings = new Settings();
         settings.setFilterableAttributes(new String[] {"published", "recycled", "exposed"});
         index.updateSettings(settings);

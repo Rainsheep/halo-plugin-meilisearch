@@ -24,4 +24,13 @@ public class MeilisearchSetting {
         MeilisearchSetting.searchUnexposed = searchUnexposed;
         MeilisearchSetting.searchRecycled = searchRecycled;
     }
+    public static void resetSetting() {
+        MeilisearchSetting.host = DEFAULT_HOST;
+        MeilisearchSetting.masterKey = DEFAULT_MASTER_KEY;
+        MeilisearchSetting.cropLength = DEFAULT_CROP_LENGTH;
+        MeilisearchSetting.searchUnpublished = DEFAULT_SEARCH_UNPUBLISHED;
+        MeilisearchSetting.searchUnexposed = DEFAULT_SEARCH_UNEXPOSED;
+        MeilisearchSetting.searchRecycled = DEFAULT_SEARCH_UNRECYCLED;
+    }
+
 }
