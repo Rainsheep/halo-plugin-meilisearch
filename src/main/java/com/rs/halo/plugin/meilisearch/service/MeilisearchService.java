@@ -10,42 +10,74 @@ import static com.rs.halo.plugin.meilisearch.config.MeilisearchSetting.DEFAULT_S
 import com.fasterxml.jackson.databind.JsonNode;
 import com.rs.halo.plugin.meilisearch.config.MeilisearchSetting;
 import com.rs.halo.plugin.meilisearch.utils.IndexHolder;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import run.halo.app.plugin.PluginConfigUpdatedEvent;
-import run.halo.app.plugin.ReactiveSettingFetcher;
+import run.halo.app.plugin.SettingFetcher;
+import run.halo.app.plugin.event.PluginStartedEvent;
+import run.halo.app.search.event.HaloDocumentRebuildRequestEvent;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class MeilisearchService {
+public class MeilisearchService implements DisposableBean {
 
-    private final ReactiveSettingFetcher settingFetcher;
+    private final SettingFetcher settingFetcher;
 
-    public void loadPluginSetting() {
-        settingFetcher.get("base")
-            .doOnSuccess(this::updateSettingCache)
-            .subscribe();
-    }
+    private final ApplicationEventPublisher eventPublisher;
 
     private void updateSettingCache(JsonNode settings) {
-        log.info("update plugin settings: {}", settings);
+        boolean needRefresh = false;
+        var newHost = settings.path("host").asText(DEFAULT_HOST);
+        if (!Objects.equals(MeilisearchSetting.host, newHost)) {
+            needRefresh = true;
+        }
+
+        var newMasterKey = settings.path("masterKey").asText(DEFAULT_MASTER_KEY);
+        if (!Objects.equals(MeilisearchSetting.masterKey, newMasterKey)) {
+            needRefresh = true;
+        }
+
         MeilisearchSetting.updateSetting(
-            settings.path("host").asText(DEFAULT_HOST),
-            settings.path("masterKey").asText(DEFAULT_MASTER_KEY),
+            newHost,
+            newMasterKey,
             settings.path("cropLength").asInt(DEFAULT_CROP_LENGTH),
             settings.path("searchUnpublished").asBoolean(DEFAULT_SEARCH_UNPUBLISHED),
             settings.path("searchUnexposed").asBoolean(DEFAULT_SEARCH_UNEXPOSED),
             settings.path("searchRecycled").asBoolean(DEFAULT_SEARCH_UNRECYCLED)
         );
+
         IndexHolder.resetIndex();
-        // todo update index document
+
+        if (needRefresh) {
+            log.info("Request to rebuild document index due to plugin setting change.");
+            eventPublisher.publishEvent(new HaloDocumentRebuildRequestEvent(this));
+        }
     }
 
     @EventListener
-    public void onPluginConfigUpdate(PluginConfigUpdatedEvent event) {
+    void onPluginConfigUpdate(PluginConfigUpdatedEvent event) {
+        log.info("Detected plugin setting change, reloading plugin setting.");
         updateSettingCache(event.getNewConfig().get("base"));
+    }
+
+    @EventListener
+    void onPluginStartedEvent(PluginStartedEvent event) {
+        // TODO Initialize after plugin started
+        log.info("Initializing plugin setting for the first startup.");
+        var settings = this.settingFetcher.get("base");
+        this.updateSettingCache(settings);
+    }
+
+    @Override
+    public void destroy() {
+        // reset configuration
+        MeilisearchSetting.resetSetting();
+        IndexHolder.resetIndex();
     }
 }
